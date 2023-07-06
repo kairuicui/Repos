@@ -1,0 +1,30 @@
+language: python
+python:
+ - "3.7"
+install:
+ - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.anaconda.com/miniconda/Miniconda3-py37_4.9.2-Linux-x86_64.sh -O miniconda.sh;
+    fi
+ - bash miniconda.sh -b -p $HOME/miniconda
+ - source "$HOME/miniconda/etc/profile.d/conda.sh"
+ - hash -r
+ - conda config --set always_yes yes --set changeps1 no
+ - conda update -q conda
+ # Useful for debugging any issues with conda
+ - conda info -a
+ - conda config --prepend channels conda-forge
+ - conda create -n ox --strict-channel-priority osmnx python=3.7
+ - conda activate ox
+ - conda install jupyter
+ - pip install -r requirements.txt
+ - pip install nbconvert
+ - pip install coveralls
+ - pip install nbval
+script:
+ - coverage run -m unittest discover tests
+ - py.test --nbval-lax docs/tutorials
+
+after_success:
+ - coveralls
